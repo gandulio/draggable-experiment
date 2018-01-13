@@ -1,5 +1,3 @@
-open Nice;
-
 type position = {
   x: int,
   y: int
@@ -21,7 +19,7 @@ type mouse = {
 };
 
 type state = {
-  position,
+  translate: position,
   mouse
 };
 
@@ -34,14 +32,6 @@ let base_styles =
     ~cursor="move",
     ()
   );
-
-let styles =
-  css([
-    BackgroundColor(Red), 
-    Display(InlineBlock), 
-    Padding(Px(50)), 
-    Position(Absolute)
-  ]);
 
 let component = ReasonReact.reducerComponent("Draggable");
 
@@ -62,7 +52,7 @@ let get_pin_offset = (global_mouse, card_pos) =>
 let make = _children => {
   ...component,
   initialState: () => {
-    position: {
+    translate: {
       x: 0,
       y: 0
     },
@@ -85,7 +75,7 @@ let make = _children => {
         ...state,
         mouse: {
           prev_position: inital_position,
-          pin_offset: subtract_positions(inital_position, state.position),
+          pin_offset: subtract_positions(inital_position, state.translate),
           button: Down
         }
       })
@@ -97,15 +87,15 @@ let make = _children => {
           button: Up
         }
       })
-    | Drag(new_mouse_position) =>
+    | Drag(new_mouse_position) => /* TODO: change to delta update instead of total position */
       switch state.mouse.button {
       | Up => ReasonReact.NoUpdate
       | Down =>
-        let position =
+        let translate =
           subtract_positions(new_mouse_position, state.mouse.pin_offset);
         let prev_position = new_mouse_position;
         ReasonReact.Update({
-          position,
+          translate,
           mouse: {
             ...state.mouse,
             prev_position
@@ -114,13 +104,14 @@ let make = _children => {
       }
     },
   render: ({state, send}) => {
-    let left = string_of_int(state.position.x) ++ "px";
-    let top = string_of_int(state.position.y) ++ "px";
+    let x = string_of_int(state.translate.x) ++ "px";
+    let y = string_of_int(state.translate.y) ++ "px";
+    let transform = "translate(" ++ x ++ "," ++ y ++ ")";
     let greeting = "Howdy :)";
     <div
       style=(
         ReactDOMRe.Style.combine(
-          ReactDOMRe.Style.make(~left, ~top, ()),
+          ReactDOMRe.Style.make(~transform, ()),
           base_styles
         )
       )
