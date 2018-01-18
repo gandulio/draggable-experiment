@@ -20,7 +20,8 @@ type mouse = {
 
 type state = {
   translate: position,
-  mouse
+  mouse,
+  el_ref: ref(option(Dom.element))
 };
 
 let base_styles =
@@ -49,6 +50,16 @@ let string_of_position = some_position =>
 let get_pin_offset = (global_mouse, card_pos) =>
   subtract_positions(global_mouse, card_pos);
 
+let set_ref = (the_ref, {ReasonReact.state}) =>
+  state.el_ref := Js.Nullable.to_opt(the_ref);
+
+let get_el = (opt_el) => {
+  switch (opt_el) {
+  | Some(el) => el
+  | None => Webapi.Dom.Document.createElement("div", Webapi.Dom.document)
+  }
+};
+
 let make = _children => {
   ...component,
   initialState: () => {
@@ -66,11 +77,13 @@ let make = _children => {
         x: 0,
         y: 0
       }
-    }
+    },
+    el_ref: ref(None)
   },
   reducer: (action, state) =>
     switch action {
     | Mouse_Down(inital_position) =>
+      state.el_ref^ |> get_el |> Js.log;
       ReasonReact.Update({
         ...state,
         mouse: {
@@ -87,7 +100,7 @@ let make = _children => {
           button: Up
         }
       })
-    | Drag(new_mouse_position) => /* TODO: change to delta update instead of total position */
+    | Drag(new_mouse_position) =>
       switch state.mouse.button {
       | Up => ReasonReact.NoUpdate
       | Down =>
@@ -95,6 +108,7 @@ let make = _children => {
           subtract_positions(new_mouse_position, state.mouse.pin_offset);
         let prev_position = new_mouse_position;
         ReasonReact.Update({
+          ...state,
           translate,
           mouse: {
             ...state.mouse,
@@ -103,7 +117,7 @@ let make = _children => {
         });
       }
     },
-  render: ({state, send}) => {
+  render: ({state, send, handle}) => {
     let x = string_of_int(state.translate.x) ++ "px";
     let y = string_of_int(state.translate.y) ++ "px";
     let transform = "translate(" ++ x ++ "," ++ y ++ ")";
@@ -115,6 +129,7 @@ let make = _children => {
           base_styles
         )
       )
+      ref=(handle(set_ref))
       onMouseDown=(
         event =>
           send(
