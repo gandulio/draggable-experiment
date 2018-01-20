@@ -97,7 +97,7 @@ let make = _children => {
     reducer: (action, state) =>
       switch action {
       | Mouse_Down(inital_position) =>
-        ReasonReact.Update({
+        ReasonReact.SilentUpdate({
           ...state,
           mouse: {
             pin_offset: subtract_positions(inital_position, state.translate),
@@ -109,7 +109,7 @@ let make = _children => {
         let rect = Webapi.Dom.Element.getBoundingClientRect(el);
         let x = Webapi.Dom.DomRect.x(rect);
         let y = Webapi.Dom.DomRect.y(rect);
-        ReasonReact.Update({
+        ReasonReact.SilentUpdate({
           ...state,
           translate: {
             x,
@@ -122,6 +122,7 @@ let make = _children => {
         });
       },
     render: ({state, send, handle}) => {
+      print_endline("render");
       let x = string_of_int(state.translate.x) ++ "px";
       let y = string_of_int(state.translate.y) ++ "px";
       let transform = "translate(" ++ x ++ "," ++ y ++ ")";
