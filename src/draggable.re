@@ -132,20 +132,37 @@ let make = _children => {
       onMouseDown=(
         event =>
           send(
-            Mouse_Down({
-              x: ReactEventRe.Mouse.screenX(event),
-              y: ReactEventRe.Mouse.screenY(event)
-            })
+            {
+              ReactEventRe.Mouse.stopPropagation(event);
+              ReactEventRe.Mouse.preventDefault(event);
+              Mouse_Down({
+                x: ReactEventRe.Mouse.screenX(event),
+                y: ReactEventRe.Mouse.screenY(event)
+              });
+            }
           )
       )
-      onMouseUp=(_event => send(Mouse_Up))
+      onMouseUp=(
+        event =>
+          send(
+            {
+              ReactEventRe.Mouse.stopPropagation(event);
+              ReactEventRe.Mouse.preventDefault(event);
+              Mouse_Up;
+            }
+          )
+      )
       onMouseMove=(
         event =>
           send(
-            Drag({
-              x: ReactEventRe.Mouse.screenX(event),
-              y: ReactEventRe.Mouse.screenY(event)
-            })
+            {
+              ReactEventRe.Mouse.stopPropagation(event);
+              ReactEventRe.Mouse.preventDefault(event);
+              Drag({
+                x: ReactEventRe.Mouse.screenX(event),
+                y: ReactEventRe.Mouse.screenY(event)
+              });
+            }
           )
       )>
       (ReasonReact.stringToElement(greeting))
