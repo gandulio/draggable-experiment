@@ -14,8 +14,7 @@ type mouse_button_status =
 
 type mouse = {
   button: mouse_button_status,
-  pin_offset: position,
-  prev_position: position
+  pin_offset: position
 };
 
 type state = {
@@ -47,9 +46,6 @@ let string_of_position = some_position =>
   ++ string_of_int(some_position.y)
   ++ "}";
 
-let get_pin_offset = (global_mouse, card_pos) =>
-  subtract_positions(global_mouse, card_pos);
-
 let set_ref = (the_ref, {ReasonReact.state}) =>
   state.el_ref := Js.Nullable.to_opt(the_ref);
 
@@ -71,10 +67,6 @@ let make = _children => {
       pin_offset: {
         x: 0,
         y: 0
-      },
-      prev_position: {
-        x: 0,
-        y: 0
       }
     },
     el_ref: ref(None)
@@ -82,11 +74,9 @@ let make = _children => {
   reducer: (action, state) =>
     switch action {
     | Mouse_Down(inital_position) =>
-      state.el_ref^ |> get_el |> Js.log;
       ReasonReact.Update({
         ...state,
         mouse: {
-          prev_position: inital_position,
           pin_offset: subtract_positions(inital_position, state.translate),
           button: Down
         }
@@ -105,14 +95,9 @@ let make = _children => {
       | Down =>
         let translate =
           subtract_positions(new_mouse_position, state.mouse.pin_offset);
-        let prev_position = new_mouse_position;
         ReasonReact.Update({
           ...state,
-          translate,
-          mouse: {
-            ...state.mouse,
-            prev_position
-          }
+          translate
         });
       }
     },
