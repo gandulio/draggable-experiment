@@ -53,12 +53,11 @@ let get_pin_offset = (global_mouse, card_pos) =>
 let set_ref = (the_ref, {ReasonReact.state}) =>
   state.el_ref := Js.Nullable.to_opt(the_ref);
 
-let get_el = (opt_el) => {
-  switch (opt_el) {
+let get_el = opt_el =>
+  switch opt_el {
   | Some(el) => el
   | None => Webapi.Dom.Document.createElement("div", Webapi.Dom.document)
-  }
-};
+  };
 
 let make = _children => {
   ...component,
@@ -91,7 +90,7 @@ let make = _children => {
           pin_offset: subtract_positions(inital_position, state.translate),
           button: Down
         }
-      })
+      });
     | Mouse_Up =>
       ReasonReact.Update({
         ...state,
@@ -148,28 +147,6 @@ let make = _children => {
               y: ReactEventRe.Mouse.screenY(event)
             })
           )
-      )
-      onMouseLeave=(
-        event => {
-          print_endline("leave");
-          send(
-            Drag({
-              x: ReactEventRe.Mouse.screenX(event),
-              y: ReactEventRe.Mouse.screenY(event)
-            })
-          );
-        }
-      )
-      onMouseEnter=(
-        event => {
-          print_endline("enter");
-          send(
-            Drag({
-              x: ReactEventRe.Mouse.screenX(event),
-              y: ReactEventRe.Mouse.screenY(event)
-            })
-          );
-        }
       )>
       (ReasonReact.stringToElement(greeting))
     </div>;
